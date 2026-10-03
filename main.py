@@ -13,7 +13,6 @@ sales = pd.read_sql("SELECT * FROM sales", conn)
 print(products.head())
 print(sales.head())
 
-
 conn.close()
 
 products_renamed = products.rename(columns={"id": "product_id"})
@@ -31,12 +30,24 @@ product_statistics = (
     .drop(columns=["product_id"])
 )
 print(product_statistics.head())
+print()
 
+category_statistics = (
+    merged.groupby("category", as_index=False)
+    .agg(
+        operations=("id", "count"),
+        units_sold=("quantity", "sum"),
+        total_sales=("total", "sum"),
+        avg_sale=("total", "mean"),
+    )
+)
+
+print(category_statistics)
 
 os.makedirs("output", exist_ok=True)
 
-
 out_conn = sqlite3.connect(OUTPUT_PATH)
 product_statistics.to_sql("product_statistics", out_conn, if_exists="replace", index=False)
+category_statistics.to_sql("category_statistics", out_conn, if_exists="replace", index=False)
 
 out_conn.close()
