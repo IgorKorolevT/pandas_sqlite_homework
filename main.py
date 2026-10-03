@@ -43,11 +43,22 @@ category_statistics = (
 )
 
 print(category_statistics)
+print()
+
+top_products = (
+    product_statistics
+    .nlargest(5, "quantity_sold")
+    [["name", "category", "quantity_sold", "total_sales"]]
+    .reset_index(drop=True)
+)
+
+print(top_products)
 
 os.makedirs("output", exist_ok=True)
 
 out_conn = sqlite3.connect(OUTPUT_PATH)
 product_statistics.to_sql("product_statistics", out_conn, if_exists="replace", index=False)
 category_statistics.to_sql("category_statistics", out_conn, if_exists="replace", index=False)
+top_products.to_sql("top_products", out_conn, if_exists="replace", index=False)
 
 out_conn.close()
